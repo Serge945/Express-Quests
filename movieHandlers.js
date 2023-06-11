@@ -25,23 +25,103 @@ const movies = [
   },
 ];
 
+const database = require("./database");
+
 const getMovies = (req, res) => {
-  res.json(movies);
+  database
+    .query("select * from movies")
+    .then(([movies]) => {
+      res.json(movies);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
 };
 
 const getMovieById = (req, res) => {
   const id = parseInt(req.params.id);
 
-  const movie = movies.find((movie) => movie.id === id);
+  
+    database
+      .query("select * from movies where id = ?", [id])
+      .then(([movies]) => {
+        if (movies[0] != null) {
+          res.json(movies[0]);
+        } else {
+          res.status(404).send("Not Found");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error retrieving data from database");
+      });
+  };
 
-  if (movie != null) {
-    res.json(movie);
-  } else {
-    res.status(404).send("Not Found");
-  }
+
+const postMovies= (req, res) =>{
+  console.log(req.body);
+  res.send('post route is working');
+}
+
+// in movieHandlers.js
+
+const updateMovie = (req, res) => {
+  const id = parseInt(req.params.id);
+  const { title, director, year, color, duration } = req.body;
+
+  database
+    .query(
+      "update movies set title = ?, director = ?, year = ?, color = ?, duration = ? where id = ?",
+      [title, director, year, color, duration, id]
+    )
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.status(404).send("Not Found");
+      } else {
+        res.sendStatus(204);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error editing the movie");
+    });
+};
+
+const deleteMovie = (req, res) => {
+  const id = parseInt(req.params.id);
+
+  database
+    .query("delete from movies where id = ?", [id])
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.status(404).send("Not Found");
+      } else {
+        res.sendStatus(204);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error deleting the movie");
+    });
 };
 
 module.exports = {
   getMovies,
   getMovieById,
+  postMovies,
+  updateMovie,
+  deleteMovie, // don't forget to export your function ;)
 };
+
+
+//   const movie = movies.find((movie) => movie.id === id);
+
+//   if (movie != null) {
+//     res.json(movie);
+//   } else {
+//     res.status(404).send("Not Found");
+//   }
+// };
+
+

@@ -3,3 +3,4 @@ DB_PORT=5000
 DB_USER=Sergi
 DB_PASSWORD=Valentina2023
 DB_NAME=movie_quests
+APP_PORT=5000
